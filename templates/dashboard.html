@@ -7,9 +7,22 @@
 </head>
 <body>
     <h1>Dashboard</h1>
-    <!-- Dashboard content goes here -->
+    <div id="nutrition-logs"></div>
 
     <!-- Bootstrap JS -->
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        fetch('/nutrition_logs')
+            .then(response => response.json())
+            .then(data => {
+                const logsContainer = document.getElementById('nutrition-logs');
+                data.forEach(log => {
+                    const logDiv = document.createElement('div');
+                    logDiv.textContent = `Date: ${log.log_date}, Mealtime: ${log.mealtime}, Food: ${log.food}, Meal: ${log.meal}`;
+                    logsContainer.appendChild(logDiv);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
 </body>
 </html>
