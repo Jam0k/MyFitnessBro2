@@ -33,5 +33,6 @@ class NutritionLog(db.Model):
     log_id = db.Column(db.Integer, primary_key=True)
     mealtime = db.Column(db.String(255))
     food_id = db.Column(db.Integer, db.ForeignKey('foods.food_id'), nullable=True)
+    serving_size = db.Column(db.String(255))
     meal_id = db.Column(db.Integer, db.ForeignKey('meals.meal_id'), nullable=True)
     log_date = db.Column(db.Date)

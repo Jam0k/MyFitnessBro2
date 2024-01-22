@@ -28,6 +28,7 @@ CREATE TABLE nutrition_logs (
     log_id SERIAL PRIMARY KEY,
     mealtime VARCHAR(255),
     food_id INT,
+    serving_size VARCHAR(255),
     meal_id INT,
     log_date DATE,
     FOREIGN KEY (food_id) REFERENCES foods(food_id),

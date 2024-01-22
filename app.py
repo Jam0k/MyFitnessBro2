@@ -42,20 +42,53 @@ def dashboard():
 @app.route('/nutrition_logs')
 def get_nutrition_logs():
     try:
-        # Query the database for nutrition logs
         logs = NutritionLog.query.all()
         log_list = []
 
         for log in logs:
-            # Fetch related food and meal details, if present
             food = Food.query.get(log.food_id)
             meal = Meal.query.get(log.meal_id)
+
+            if meal:
+                # Fetch all foods in the meal
+                meal_foods = MealFoods.query.filter_by(meal_id=meal.meal_id).all()
+                total_calories = total_protein = total_fat = total_carbs = total_sugar = 0
+
+                # Sum the nutritional values of each food
+                for mf in meal_foods:
+                    f = Food.query.get(mf.food_id)
+                    total_calories += f.food_calories
+                    total_protein += f.food_protein
+                    total_fat += f.food_fat
+                    total_carbs += f.food_carbohydrate
+                    total_sugar += f.food_sugar
+
+                food_details = {
+                    'name': meal.meal_name,
+                    'calories': str(total_calories),
+                    'protein': str(total_protein),
+                    'fat': str(total_fat),
+                    'carbohydrate': str(total_carbs),
+                    'sugar': str(total_sugar)
+                }
+            elif food:
+                food_details = {
+                    'name': food.food_name,
+                    'calories': str(food.food_calories),
+                    'protein': str(food.food_protein),
+                    'fat': str(food.food_fat),
+                    'carbohydrate': str(food.food_carbohydrate),
+                    'sugar': str(food.food_sugar)
+                }
+            else:
+                food_details = None
 
             log_entry = {
                 'log_id': log.log_id,
                 'log_date': log.log_date.isoformat(),
                 'mealtime': log.mealtime,
-                'food': food.food_name if food else None,
+                'serving_size': log.serving_size,
+                'food': food_details,
                 'meal': meal.meal_name if meal else None
             }
             log_list.append(log_entry)
@@ -64,6 +97,7 @@ def get_nutrition_logs():
     except SQLAlchemyError as e:
         logger.error(f"Failed to fetch nutrition logs: {e}")
         return jsonify({"error": "Failed to fetch data"}), 500
+
 
 # Error handlers
 

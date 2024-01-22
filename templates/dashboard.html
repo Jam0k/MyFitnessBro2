@@ -7,7 +7,9 @@
 </head>
 <body>
     <h1>Dashboard</h1>
-    <div id="nutrition-logs"></div>
+    
+    <!-- Container for mealtime sections -->
+    <div id="mealtime-container"></div>
 
     <!-- Bootstrap JS -->
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
@@ -15,11 +17,23 @@
         fetch('/nutrition_logs')
             .then(response => response.json())
             .then(data => {
-                const logsContainer = document.getElementById('nutrition-logs');
+                const mealtimeContainer = document.getElementById('mealtime-container');
+                const mealtimeSections = {};
+
                 data.forEach(log => {
+                    // Create a section for each unique mealtime
+                    if (!mealtimeSections[log.mealtime]) {
+                        mealtimeSections[log.mealtime] = document.createElement('div');
+                        mealtimeSections[log.mealtime].className = 'mealtime-section';
+                        mealtimeSections[log.mealtime].innerHTML = `<h2>${log.mealtime.charAt(0).toUpperCase() + log.mealtime.slice(1)}</h2>`;
+                        mealtimeContainer.appendChild(mealtimeSections[log.mealtime]);
+                    }
+
+                    // Create a div element for each log entry within the mealtime section
                     const logDiv = document.createElement('div');
-                    logDiv.textContent = `Date: ${log.log_date}, Mealtime: ${log.mealtime}, Food: ${log.food}, Meal: ${log.meal}`;
-                    logsContainer.appendChild(logDiv);
+                    logDiv.className = 'log-entry';
+                    logDiv.textContent = `Date: ${log.log_date}, Mealtime: ${log.mealtime}, Food/Meal: ${log.meal || (log.food && log.food.name)}, Calories: ${log.food ? log.food.calories : ''}, Protein: ${log.food ? log.food.protein : ''}, Fat: ${log.food ? log.food.fat : ''}, Carbs: ${log.food ? log.food.carbohydrate : ''}, Sugar: ${log.food ? log.food.sugar : ''}, Serving Size: ${log.serving_size}`;
+                    mealtimeSections[log.mealtime].appendChild(logDiv);
                 });
             })
             .catch(error => console.error('Error:', error));
